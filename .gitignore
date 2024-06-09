@@ -35,7 +35,7 @@ MANIFEST
 # Environments
 .env
 .venv
-env/
+tesisEnv/
 venv/
 ENV/
 env.bak/
