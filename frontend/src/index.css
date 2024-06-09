@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.bg-base{
+    /* background-image: linear-gradient( 95deg,  rgb(43, 18, 90) 20.2%, rgba(198,55,160,1) 138.2% );
+    background-size: 100%; */
+    background-color: white;
+    background: url('./img/bg2.png');
+    /* background-size: cover; */
+}
+html,body{
+    overflow-x: hidden;
+}
+body{
+    position: static;
+}
+.is-active{
+    background-color: #ECCE8E;
+    padding: 5px;
+    border-radius: 10px;
+}
+/* lg:h-screen */
+@layer base{
+    .section{
+        @apply min-h-screen flex items-center lg:p-8 p-6
+    }
+    .btn{
+        @apply lg:py-[10px] lg:px-[25px] text-center uppercase bg-btn text-morado block py-[10px] px-[20px] hover:bg-btnhover hover:no-underline transition-all text-sm lg:text-base hover:tracking-wider m-0
+    }
+
+    .gradient{
+        @apply bg-celeste py-2 px-8 cursor-pointer
+    }
+
+    .gradient-text{
+        @apply bg-gradient-to-r from-[#5FC3E4] to-[#E55D87] text-transparent bg-clip-text
+    }
+    
+    .onhover{
+        @apply transition hover:scale-[1.35]
+    }
+
+    .input-form{
+        @apply bg-transparent border-b outline-none w-full placeholder:text-white font-secondary focus:border-[#e042b1] focus:outline-none transition-all caret-white text-white py-2 
+    }
+}
