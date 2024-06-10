@@ -14,6 +14,8 @@ class BERTDataset:
 
     def __getitem__(self, item):
         review = str(self.review[item])
+        # review = review.lower()
+        review = review.replace("-", " ").replace(":", " ")
         review = " ".join(review.split())
 
         inputs = self.tokenizer.encode_plus(

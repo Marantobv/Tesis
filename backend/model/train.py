@@ -12,6 +12,7 @@ from sklearn.utils import class_weight
 from transformers import AdamW
 from transformers import get_linear_schedule_with_warmup
 from sklearn.metrics import classification_report
+from sklearn.utils import resample
 
 
 def run():
@@ -24,6 +25,13 @@ def run():
         "negative": 0
     }
     dfx.sentiment = dfx.sentiment.map(sentiment_mapping)
+
+    # Sobremuestreo de noticias positivas
+    positive = dfx[dfx.sentiment == 2]
+    neutral = dfx[dfx.sentiment == 1]
+    negative = dfx[dfx.sentiment == 0]
+    positive_upsampled = resample(positive, replace=True, n_samples=len(neutral), random_state=42)
+    dfx = pd.concat([negative, neutral, positive_upsampled])
 
     df_train, df_valid = model_selection.train_test_split(
         dfx, test_size=0.1, random_state=42, stratify=dfx.sentiment.values
@@ -53,10 +61,7 @@ def run():
     model.to(device)
 
     # Calcular los pesos de las clases
-    class_weights = class_weight.compute_class_weight('balanced',
-                                                      classes=np.unique(df_train.sentiment.values),
-                                                      y=df_train.sentiment.values)
-    class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
+    class_weights = torch.tensor([1.0, 1.0, 2.0], dtype=torch.float).to(device)
 
     param_optimizer = list(model.named_parameters())
     no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
