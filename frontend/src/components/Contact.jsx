@@ -23,7 +23,7 @@ function Contact() {
 
     const getComparisonImage = () => {
         if (!prediction) return null;
-        return prediction.last_close_value > prediction.predicted_close_price ? baja : alza;
+        return prediction.last_close_price > prediction.predicted_price ? baja : alza;
     }
 
     return (
@@ -34,9 +34,9 @@ function Contact() {
                         <h1 className='lg:text-7xl text-5xl font-bold uppercase font-primary text-naranja text-center'>Predicción para el día de mañana</h1>
                         {prediction ? (
                             <div className='flex flex-col items-center justify-center mt-10'>
-                                <h2 className='font-tertiary text-4xl text-morado'>Fecha: <span className='font-bold'>{prediction.last_date}</span></h2>
-                                <h2 className='font-tertiary text-4xl text-morado'>Último precio de cierre: <span className='font-bold'>{prediction.last_close_value.toFixed(2)}</span></h2>
-                                <h2 className='font-tertiary text-4xl text-morado'>Predicción del precio de cierre para mañana: <span className='font-bold'>{prediction.predicted_close_price.toFixed(2)}</span></h2>
+                                <h2 className='font-tertiary text-4xl text-morado'>Fecha: <span className='font-bold'>{prediction.last_day}</span></h2>
+                                <h2 className='font-tertiary text-4xl text-morado'>Último precio de cierre: <span className='font-bold'>{prediction.last_close_price.toFixed(2)}</span></h2>
+                                <h2 className='font-tertiary text-4xl text-morado'>Predicción del precio de cierre para mañana: <span className='font-bold'>{prediction.predicted_price.toFixed(2)}</span></h2>
                                 <img src={getComparisonImage()} alt="Comparison result" className="mt-4 object-contain" />
                             </div>
                         ) : (
