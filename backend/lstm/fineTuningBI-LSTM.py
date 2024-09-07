@@ -46,7 +46,6 @@ target_validation = df_validation[['Close']].values
 features_test = df_test[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'Sentiment']].values
 target_test = df_test[['Close']].values
 
-# Escalar los datos
 scaler_features_train = MinMaxScaler(feature_range=(-1, 1))
 scaler_close_train = MinMaxScaler(feature_range=(-1, 1))
 
@@ -114,7 +113,7 @@ class BiLSTMModel(nn.Module):
         return out
 
 # Inicializar el modelo
-input_size = X_train.shape[2]  # This should now be 7
+input_size = X_train.shape[2] 
 hidden_size = 64
 num_layers = 2
 output_size = 1
@@ -169,15 +168,10 @@ for epoch in range(EPOCHS):
             print("Early stopping")
             break
 
-# 4. Fine-Tuning (con 'Sentiment')
-# Ajustar el modelo para aceptar 7 características ahora
-
-# Asegurarse de que las nuevas capas estén en la GPU
 model.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers, 
                      batch_first=True, bidirectional=True).to(device)
 model.fc = nn.Linear(hidden_size * 2, output_size).to(device)
 
-# Reentrenar las nuevas capas
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10)
 
@@ -198,7 +192,6 @@ for epoch in range(EPOCHS_FINE_TUNE):
         loss.backward()
         optimizer.step()
     
-    # Validation
     model.eval()
     val_loss = 0
     with torch.no_grad():
@@ -222,20 +215,17 @@ for epoch in range(EPOCHS_FINE_TUNE):
             print("Early stopping")
             break
 
-# Load the best model for final prediction
 model.load_state_dict(torch.load('best_model.pth'))
 
-# Predicción final
-input_sequence = scaled_features_test[-SEQ_LENGTH:]  # Use test data instead of validation
+input_sequence = scaled_features_test[-SEQ_LENGTH:]
 input_sequence = torch.tensor(input_sequence, dtype=torch.float32).unsqueeze(0).to(device)
 
 model.eval()
 with torch.no_grad():
     prediction = model(input_sequence)
 
-# Invertir la escala para 'Close'
 predicted_close_price = scaler_close_train.inverse_transform(prediction.cpu().numpy())
-actual_close_price = df_test['Close'].iloc[-1]  # Get the last actual close price from test data
+actual_close_price = df_test['Close'].iloc[-1]
 
 print(f"Predicción del precio de cierre: {predicted_close_price[0][0]:.2f}")
 print(f"Precio de cierre real: {actual_close_price:.2f}")
@@ -243,11 +233,9 @@ print(f"Diferencia: {actual_close_price - predicted_close_price[0][0]:.2f}")
 
 torch.save(model.state_dict(), 'fineTuning_model.pth')
 
-# Function to calculate MAPE
 def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
-# Evaluation on test set
 model.eval()
 all_predictions = []
 all_targets = []
@@ -259,15 +247,12 @@ with torch.no_grad():
         all_predictions.extend(outputs.cpu().numpy())
         all_targets.extend(labels.cpu().numpy())
 
-# Convert to numpy arrays
 all_predictions = np.array(all_predictions)
 all_targets = np.array(all_targets)
 
-# Inverse transform the scaled values
 predictions_original = scaler_close_train.inverse_transform(all_predictions)
 targets_original = scaler_close_train.inverse_transform(all_targets)
 
-# Calculate metrics
 mape = mean_absolute_percentage_error(targets_original, predictions_original)
 mae = mean_absolute_error(targets_original, predictions_original)
 rmse = np.sqrt(mean_squared_error(targets_original, predictions_original))
@@ -277,7 +262,6 @@ print(f"MAPE: {mape:.2f}%")
 print(f"MAE: {mae:.2f}")
 print(f"RMSE: {rmse:.2f}")
 
-# Create a plot
 plt.figure(figsize=(12, 6))
 plt.plot(targets_original, label='Real Price', color='blue')
 plt.plot(predictions_original, label='Predicted Price', color='red')
@@ -287,7 +271,6 @@ plt.ylabel('Price')
 plt.legend()
 plt.grid(True)
 
-# Save the plot as an image file
 plt.savefig('real_vs_predicted_prices_BiLSTM.png')
 plt.close()
 

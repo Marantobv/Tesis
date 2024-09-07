@@ -71,14 +71,13 @@ class BiLSTMModel(nn.Module):
         
         out, _ = self.lstm(x, (h0, c0))
         
-        # Tomar la última salida de ambas direcciones
-        out = out[:, -1, :]  # Solo la última salida en ambas direcciones
+        out = out[:, -1, :] 
         
         out = self.fc(out)
         return out
 
-input_size_train = X_train.shape[2]  # 6 características: Open, High, Low, Close, Adj Close, Volume
-input_size_test = X_test.shape[2]  # 7 características: Open, High, Low, Close, Adj Close, Volume, Sentiment
+input_size_train = X_train.shape[2]
+input_size_test = X_test.shape[2]
 hidden_size = 64
 num_layers = 2
 output_size = 1
@@ -107,11 +106,9 @@ for epoch in range(EPOCHS):
     
     print(f'Epoch [{epoch+1}/{EPOCHS}], Loss: {loss.item():.4f}')
 
-# Remove the validation loop and use test data for fine-tuning
 model.lstm = nn.LSTM(input_size=input_size_test, hidden_size=hidden_size, num_layers=num_layers, batch_first=True, bidirectional=True).to(device)
-model.fc = nn.Linear(hidden_size * 2, output_size).to(device)  # *2 because of bidirectional
+model.fc = nn.Linear(hidden_size * 2, output_size).to(device)
 
-# Retrain the new layers
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 EPOCHS_FINE_TUNE = 50

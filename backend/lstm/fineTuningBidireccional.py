@@ -87,14 +87,13 @@ class BiLSTMModel(nn.Module):
         
         out, _ = self.lstm(x, (h0, c0))
         
-        # Tomar la última salida de ambas direcciones
-        out = out[:, -1, :]  # Solo la última salida en ambas direcciones
+        out = out[:, -1, :]
         
         out = self.fc(out)
         return out
 
-input_size_train = X_train.shape[2]  # 6 características: Open, High, Low, Close, Adj Close, Volume
-input_size_finetune = X_validation.shape[2]  # 7 características: Open, High, Low, Close, Adj Close, Volume, Sentiment
+input_size_train = X_train.shape[2]
+input_size_finetune = X_validation.shape[2] 
 hidden_size = 64
 num_layers = 2
 output_size = 1

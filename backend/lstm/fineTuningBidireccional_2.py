@@ -23,10 +23,8 @@ class BiLSTMModel(nn.Module):
         out = self.fc(out)
         return out
 
-# Load the saved model
 checkpoint = torch.load('fineTuning.pth')
 
-# Recreate the model architecture
 model = BiLSTMModel(
     input_size=checkpoint['input_size_finetune'],
     hidden_size=checkpoint['hidden_size'],
@@ -34,62 +32,47 @@ model = BiLSTMModel(
     output_size=checkpoint['output_size']
 )
 
-# Load the model weights
 model.load_state_dict(checkpoint['model_state_dict'])
 
-# Set the model to evaluation mode
 model.eval()
 
-# Load scalers
 scaler_features_finetune = checkpoint['scaler_features_finetune']
 scaler_close_train = checkpoint['scaler_close_train']
 
-# Function to make prediction for the next day
 def predict_next_day(input_data):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
     
-    # Scale the input data
     scaled_input = scaler_features_finetune.transform(input_data)
     
-    # Prepare the input tensor
     input_tensor = torch.tensor(scaled_input, dtype=torch.float32).unsqueeze(0).to(device)
     
     with torch.no_grad():
         prediction = model(input_tensor)
     
-    # Inverse transform the prediction to get the actual price
     predicted_close_price = scaler_close_train.inverse_transform(prediction.cpu().numpy())[0][0]
     
     return predicted_close_price
 
-# Load data from CSV
 def load_csv_data(file_path, seq_length=60):
     df = pd.read_csv(file_path)
     
-    # Ensure the DataFrame has the required columns
     required_columns = ['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'Sentiment']
     if not all(col in df.columns for col in required_columns):
         raise ValueError(f"CSV must contain all of these columns: {required_columns}")
     
-    # Sort by date to ensure the latest data is at the end
     df['Date'] = pd.to_datetime(df['Date'])
     df = df.sort_values('Date')
     
-    # Get the last seq_length rows
     last_seq_length_days = df[required_columns].tail(seq_length).values
     
     return last_seq_length_days, df['Date'].iloc[-1]
 
-# Example usage
 if __name__ == "__main__":
-    # Load data from CSV
     input_data, last_date = load_csv_data("pruebaData.csv")
     
-    # Make prediction
     predicted_price = predict_next_day(input_data)
     
-    # Calculate the date for the prediction
     next_day = last_date + pd.Timedelta(days=1)
     
     print(f"Last date in data: {last_date.date()}")
