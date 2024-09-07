@@ -10,28 +10,12 @@ model.load_state_dict(torch.load(config.MODEL_PATH))
 model.to(device)
 model.eval()
 
-
-# import unicodedata
-
-# def clean_text(text):
-#     if isinstance(text, str):
-#         # Normalizar el texto para eliminar caracteres Unicode especiales
-#         text = unicodedata.normalize("NFKD", text)
-#         # Eliminar caracteres no alfanuméricos excepto los signos de puntuación básicos
-#         text = ''.join([c for c in text if not unicodedata.combining(c)])
-#         return text
-#     else:
-#         return ""
-
-# Cargar archivo JSON
 with open('../combiSINREPE.json', 'r') as file:
     data = json.load(file)
 
-# Convertir a DataFrame
 df = pd.DataFrame(data)
 
 def preprocess_text(text):
-    # Verificar que el texto no sea nulo y sea una cadena
     if isinstance(text, str):
         return " ".join(text.split())
     else:
@@ -75,13 +59,8 @@ def classify_text(model, text, tokenizer, device):
     elif sentiment == 2:
         return "positive"
 
-# df['title'] = df['title'].apply(clean_text)
-# df['summary'] = df['summary'].apply(clean_text)
-
-# Clasificar noticias
 df['sentiment'] = df.apply(lambda row: classify_text(model, row['title'] + " " + row['description'], tokenizer, device), axis=1)
 
-# Guardar en un nuevo archivo JSON
 result = df.to_dict(orient='records')
 
 with open('cosoSentiment.json', 'w') as file:

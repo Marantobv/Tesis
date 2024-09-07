@@ -21,5 +21,4 @@ class BERTBaseUncased(nn.Module):
         output = self.out(bo)
         return output
     def loss_fn(outputs, targets):
-        #targets = (targets + 1)
         return nn.CrossEntropyLoss()(outputs, targets)

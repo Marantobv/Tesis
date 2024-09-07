@@ -28,14 +28,14 @@ class BiLSTMModel(nn.Module):
         self.num_layers = num_layers
         self.lstm = nn.LSTM(input_size, hidden_size, num_layers, 
                             batch_first=True, bidirectional=True)
-        self.fc = nn.Linear(hidden_size * 2, output_size)  # *2 para bidireccional
+        self.fc = nn.Linear(hidden_size * 2, output_size) 
     
     def forward(self, x):
         h0 = torch.zeros(self.num_layers * 2, x.size(0), self.hidden_size).to(x.device)
         c0 = torch.zeros(self.num_layers * 2, x.size(0), self.hidden_size).to(x.device)
         
         out, _ = self.lstm(x, (h0, c0))
-        out = out[:, -1, :]  # Tomar la última salida de la secuencia
+        out = out[:, -1, :]
         out = self.fc(out)
         return out
 
@@ -51,18 +51,15 @@ def predict():
     torch.backends.cudnn.benchmark = False
     df = pd.read_csv('SP500_FullSentiment.csv')
 
-    # Dividir en conjunto de entrenamiento y fine-tuning
     df_train = df[df['Date'] < '2021-01-01']
     df_finetune = df[df['Date'] >= '2021-01-01']
 
-    # Preparar características y objetivos para cada conjunto
     features_train = df_train[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']].values
     target_train = df_train[['Close']].values
 
     features_finetune = df_finetune[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'Sentiment']].values
     target_finetune = df_finetune[['Close']].values
 
-    # Escalar los datos
     scaler_features_train = MinMaxScaler(feature_range=(-1, 1))
     scaler_close_train = MinMaxScaler(feature_range=(-1, 1))
 
@@ -75,17 +72,14 @@ def predict():
 
     SEQ_LENGTH = 60
 
-    # Crear secuencias para el entrenamiento inicial
     X_train, y_train = create_sequences(scaled_features_train, scaled_close_train, SEQ_LENGTH)
     X_finetune, y_finetune = create_sequences(scaled_features_finetune, scaled_close_finetune, SEQ_LENGTH)
 
-    # Crear DataLoaders
     train_loader = DataLoader(TensorDataset(X_train, y_train), batch_size=32, shuffle=True)
     finetune_loader = DataLoader(TensorDataset(X_finetune, y_finetune), batch_size=32, shuffle=False)
 
-    # Inicializar el modelo
-    input_size_train = X_train.shape[2]  # 6 características: Open, High, Low, Close, Adj Close, Volume
-    input_size_finetune = X_finetune.shape[2]  # 7 características: Open, High, Low, Close, Adj Close, Volume, Sentiment
+    input_size_train = X_train.shape[2]
+    input_size_finetune = X_finetune.shape[2]
     hidden_size = 64
     num_layers = 2
     output_size = 1
@@ -97,7 +91,6 @@ def predict():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    # 3. Entrenamiento Inicial (sin 'Sentiment')
     EPOCHS = 20
 
     for epoch in range(EPOCHS):
@@ -119,7 +112,6 @@ def predict():
     model.lstm = nn.LSTM(input_size=input_size_finetune, hidden_size=hidden_size, num_layers=num_layers, batch_first=True, bidirectional=True).to(device)
     model.fc = nn.Linear(hidden_size * 2, output_size).to(device)  # *2 because of bidirectional
 
-    # Reentrenar las nuevas capas
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     EPOCHS_FINE_TUNE = 20
@@ -146,10 +138,8 @@ def predict():
     with torch.no_grad():
         prediction = model(input_sequence)
 
-    # Invertir la escala para 'Close'
     predicted_close_price = scaler_close_train.inverse_transform(prediction.cpu().numpy())
     
-    # Get the last close value from the CSV
     last_close_value = df['Close'].iloc[-1]
     last_date = df['Date'].iloc[-1]
     

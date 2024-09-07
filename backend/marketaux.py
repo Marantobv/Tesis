@@ -19,7 +19,6 @@ api_key_14 = "YSrYCTPq2xJWYHGLsNPK8c64DjC0Tyfsi5EtUU9G"
 api_key_15 = "ODobOJgwuh43qCxZMGhyl00rU8o7nvws3MyVz1pP"
 api_key_16 = "aKYI2pUA2GE1pnbWPPpLjJVJTuMuh5MVDvfKG5MY"
 
-# Función para obtener noticias de un día específico
 def get_news_for_date(date, pages):
     news_list = []
     for page in range(1, pages + 1):
@@ -35,39 +34,30 @@ def get_news_for_date(date, pages):
             })
     return news_list
 
-# Variables de configuración
 start_date = datetime.strptime("2024-08-15", "%Y-%m-%d")
 total_requests_per_day = 25
 total_days = 1
 max_requests_per_day = 25
 
-# Lista para almacenar todas las noticias
 all_news = []
 
-# Contador para controlar el número de solicitudes
 requests_made = 0
 
-# Bucle para obtener noticias
 current_date = start_date
 while requests_made < max_requests_per_day:
-   # print(requests_made)
     for day in range(total_days):
         date_str = current_date.strftime("%Y-%m-%d")
         pages_to_fetch = 25
         
-        # Obtener noticias para el día actual
         news = get_news_for_date(date_str, pages_to_fetch)
         all_news.extend(news)
         
-        # Incrementar el contador de solicitudes
         requests_made += pages_to_fetch
         if requests_made >= max_requests_per_day:
             break
         
-        # Avanzar al siguiente día
         current_date += timedelta(days=1)
 
-# Guardar las noticias en un archivo JSON
 with open("10.json", "w") as file:
     json.dump(all_news, file, indent=4)
 

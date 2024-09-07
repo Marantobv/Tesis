@@ -18,7 +18,6 @@ from sklearn.utils import resample
 def run():
     dfx = pd.read_csv(config.TRAINING_FILE).fillna("none")
 
-    # Mapeo de sentimientos a números
     sentiment_mapping = {
         "positive": 2,
         "neutral": 1,
