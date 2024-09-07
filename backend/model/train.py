@@ -26,22 +26,26 @@ def run():
     }
     dfx.sentiment = dfx.sentiment.map(sentiment_mapping)
 
-    # Sobremuestreo de noticias positivas
-    positive = dfx[dfx.sentiment == 2]
-    neutral = dfx[dfx.sentiment == 1]
-    negative = dfx[dfx.sentiment == 0]
-    positive_upsampled = resample(positive, replace=True, n_samples=len(neutral), random_state=42)
-    dfx = pd.concat([negative, neutral, positive_upsampled])
+    # Sobremuestreo de noticias positivas y negativas
+    # positive = dfx[dfx.sentiment == 2]
+    # neutral = dfx[dfx.sentiment == 1]
+    # negative = dfx[dfx.sentiment == 0]
+    
+    # Asegurarse de que las clases positivas y negativas tengan el mismo número de muestras que las neutras
+    # positive_upsampled = resample(positive, replace=True, n_samples=len(neutral), random_state=42)
+    # negative_upsampled = resample(negative, replace=True, n_samples=len(neutral), random_state=42)
+    
+    # dfx = pd.concat([positive_upsampled, neutral, negative_upsampled])
 
     df_train, df_valid = model_selection.train_test_split(
-        dfx, test_size=0.1, random_state=42, stratify=dfx.sentiment.values
+        dfx, test_size=0.2, random_state=42, stratify=dfx.sentiment.values
     )
 
     df_train = df_train.reset_index(drop=True)
     df_valid = df_valid.reset_index(drop=True)
 
     train_dataset = dataset.BERTDataset(
-        review=df_train.review.values, target=df_train.sentiment.values
+        text=df_train.text.values, target=df_train.sentiment.values
     )
 
     train_data_loader = torch.utils.data.DataLoader(
@@ -49,7 +53,7 @@ def run():
     )
 
     valid_dataset = dataset.BERTDataset(
-        review=df_valid.review.values, target=df_valid.sentiment.values
+        text=df_valid.text.values, target=df_valid.sentiment.values
     )
 
     valid_data_loader = torch.utils.data.DataLoader(
@@ -61,7 +65,7 @@ def run():
     model.to(device)
 
     # Calcular los pesos de las clases
-    class_weights = torch.tensor([1.0, 1.0, 2.0], dtype=torch.float).to(device)
+    class_weights = torch.tensor([1.0, 1.0, 1.0], dtype=torch.float).to(device)
 
     param_optimizer = list(model.named_parameters())
     no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]

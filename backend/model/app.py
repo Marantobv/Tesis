@@ -54,15 +54,7 @@ def predict():
     sentence = request.args.get("sentence")
     start_time = time.time()
     predictions = sentence_prediction(sentence)
-    # positive_prediction = sentence_prediction(sentence)
-    # negative_prediction = 1 - positive_prediction
     response = {}
-    # response["response"] = {
-    #     "positive": str(positive_prediction),
-    #     "negative": str(negative_prediction),
-    #     "sentence": str(sentence),
-    #     "time_taken": str(time.time() - start_time),
-    # }
     response["response"] = {
         "positive": str(predictions[2]),  # Probabilidad de la clase positiva
         "neutral": str(predictions[1]),   # Probabilidad de la clase neutral

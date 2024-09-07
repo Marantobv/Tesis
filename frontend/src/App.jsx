@@ -16,7 +16,7 @@ function App() {
       <Home></Home>
       <About></About>
       <Charts></Charts>
-      <Knowledge></Knowledge>
+      {/* <Knowledge></Knowledge> */}
       <Projects></Projects>
       <Contact></Contact>
       <div className='h-[200px]'></div>

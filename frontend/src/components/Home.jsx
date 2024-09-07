@@ -1,5 +1,6 @@
 import React from 'react'
 import stock1 from './../img/stock1.png'
+import prueba from './../img/prueba.png'
 import { BsGithub,BsLinkedin,BsFacebook,BsWhatsapp } from 'react-icons/bs'
 import { TypeAnimation } from 'react-type-animation'
 import { motion } from 'framer-motion'
@@ -12,7 +13,7 @@ function Home() {
       <div className='flex flex-1 items-center justify-center lg:gap-[100px] max-w-full'>
         <div className='flex-1 flex-col lg:justify-center lg:text-left text-center p-16'>
           <motion.h2 variants={fade("up", 1)} initial={"init"} whileInView={"view"} className='lg:text-7xl text-5xl font-bold uppercase font-primary text-morado'>
-          Plataforma de Análisis de Sentimientos y Predicción de Índices Bursátiles
+          Modelo Predictivo de Índices Bursátiles
           </motion.h2>
           <motion.div variants={fade("up", 1.3)} initial={"init"} whileInView={"view"}>
             <div  className='flex lg:justify-start justify-center items-center mt-6 mb-2 lg:mt-4 lg:mb-4 uppercase font-primary'>
@@ -48,16 +49,16 @@ function Home() {
                 <BsWhatsapp className='cursor-pointer onhover' size={32} aria-label='Whatsapp'></BsWhatsapp>
               </a>
             </div> */}
-            <div className='flex lg:justify-start justify-center items-center lg:gap-8 gap-6 mt-8'>
+            {/* <div className='flex lg:justify-start justify-center items-center lg:gap-8 gap-6 mt-8'>
               <a href='https://wa.link/1ayc0i' target='_blank'>
                 <button type='button' className='btn font-tertiary gradient'>Regístrate</button>
               </a>
               <a target='_blank' href='/Gil Cusipuma.pdf' className=' hover:tracking-wider transition-all cursor-pointer text-xl font-bold text-morado'>Inicia sesión</a>
-            </div>
+            </div> */}
           </motion.div>
         </div>
         <div className='flex-1'>
-          <motion.img variants={fade("down", 1)} initial={"init"} whileInView={"view"} className='hidden lg:flex' src={stock1} alt='Antony Dev'></motion.img>
+          <motion.img variants={fade("down", 1)} initial={"init"} whileInView={"view"} className='hidden lg:flex' src={prueba} alt='Antony Dev'></motion.img>
         </div>
       </div>
     </div>

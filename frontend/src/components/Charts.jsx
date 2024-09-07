@@ -29,7 +29,7 @@ const Charts = () => {
                 console.log(response);
                 if (data) {
                     const dates = Object.keys(data).reverse();
-                    const closingPrices = dates.map(date => data[date]['4. close']);
+                    const closingPrices = dates.map(date => data[date]['4. close'] * 10);
                     
                     setChartData({
                         labels: dates,

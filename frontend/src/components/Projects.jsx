@@ -54,7 +54,7 @@ function Projects() {
   return (
     <div className='section my-[50px]' id='projects'>
       <div className='container mx-auto max-w-[1200px]'>
-        <div className='grid lg:grid-cols-2 grid-cols-1 gap-10'>
+        {/* <div className='grid lg:grid-cols-2 grid-cols-1 gap-10'>
           <motion.div className='text-center lg:text-left mx-auto' variants={fade("right", 1.1)} initial={"init"} whileInView={"view"}>
             <h2 className='font-primary text-[#9b33cc] text-4xl uppercase'>Mis últimos proyectos</h2>
             <p className='font-secondary text-lg text-white py-4'>Páginas web construidas como práctica de las bases del desarrollo web front-end</p>
@@ -76,7 +76,7 @@ function Projects() {
               </motion.div>
             ))
           }
-        </div>
+        </div> */}
       </div>
     </div>
   )

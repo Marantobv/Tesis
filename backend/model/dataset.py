@@ -3,23 +3,23 @@ import torch
 
 
 class BERTDataset:
-    def __init__(self, review, target):
-        self.review = review
+    def __init__(self, text, target):
+        self.text = text
         self.target = target
         self.tokenizer = config.TOKENIZER
         self.max_len = config.MAX_LEN
 
     def __len__(self):
-        return len(self.review)
+        return len(self.text)
 
     def __getitem__(self, item):
-        review = str(self.review[item])
-        # review = review.lower()
-        review = review.replace("-", " ").replace(":", " ")
-        review = " ".join(review.split())
+        text = str(self.text[item])
+        # text = text.lower()
+        text = text.replace("-", " ").replace(":", " ")
+        text = " ".join(text.split())
 
         inputs = self.tokenizer.encode_plus(
-            review,
+            text,
             None,
             add_special_tokens=True,
             max_length=self.max_len,
