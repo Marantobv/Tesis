@@ -9,7 +9,9 @@ function Header() {
         
         <div className='flex lg:flex-row flex-col justify-center items-center text-xl font-bold lg:gap-4'>
           <a className='p-4 cursor-pointer'>Home</a>
-          <a className='py-2 px-8 border-black border-2 cursor-pointer'>Noticias</a>
+          <Link activeClass='is-active' className='cursor-pointer text-morado' to='projects' spy={true} smooth={true} offset={50} duration={500}>
+            <a className='py-2 px-8 border-black border-2 cursor-pointer'>Noticias</a>
+          </Link>
           <a className='p-4' href='https://wa.link/1ayc0i' target='_blank'>
             <Link activeClass='is-active' className='cursor-pointer text-morado' to='contact' spy={true} smooth={true} offset={50} duration={500}>
               <button type='button' className='font-tertiary bg-celeste py-2 px-8 cursor-pointer btn'>Resultado de hoy</button>

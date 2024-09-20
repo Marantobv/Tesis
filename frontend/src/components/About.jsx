@@ -23,8 +23,8 @@ function About() {
         </div>
         <motion.div variants={fade("left", 1)} initial={"init"} whileInView={"view"} className='flex flex-col justify-center text-left p-5 flex-[1]'>
           <h2 className='text-5xl font-primary font-bold text-amarillo uppercase'>Proyecto 20241094</h2>
-          <h3 className='text-morado text-2xl font-secondary font-bold mt-4'>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</h3>
-          <p className='text-morado font-secondary text-lg mt-3 font-light break-words'>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s</p>
+          <h3 className='text-morado text-2xl font-secondary font-bold mt-4'>Análisis de Series Temporales y Sentimientos para la Predicción del Mercado</h3>
+          <p className='text-morado font-secondary text-lg mt-3 font-light break-words'>Este modelo predictivo utiliza un enfoque híbrido que combina análisis de series temporales y procesamiento de lenguaje natural (PLN) para predecir los precios del índice SP500. Basado en técnicas avanzadas como redes LSTM y análisis de sentimientos, el modelo no solo toma en cuenta datos históricos de precios, sino también el sentimiento generado por noticias financieras. Este enfoque permite obtener predicciones más precisas y reflejar el impacto emocional en el comportamiento del mercado.</p>
           <div className='flex gap-10 mt-6'>
             <div ref={ref}>
             <span className='font-primary text-verde text-4xl font-bold'>0.</span>{inView ? <CountUp className='font-primary text-verde text-4xl font-bold' end={79}></CountUp> : null}
