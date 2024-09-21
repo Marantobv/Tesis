@@ -40,11 +40,11 @@ function About() {
             </div>
           </div>
             <div className='mt-10 flex items-center gap-4'>
-              <a href='#' target='_blank'>
-                <button className='btn font-tertiary gradient' type='button'>Predecir</button>
+              <a href='https://drive.google.com/drive/folders/1P5F5IFjEl2L8CnrFF1rivHibRf03nmVC?usp=sharing' target='_blank'>
+                <button className='btn font-tertiary gradient' type='button'>Datos usados</button>
               </a>
               
-              <a target='_blank' href='https://drive.google.com/drive/folders/1P5F5IFjEl2L8CnrFF1rivHibRf03nmVC?usp=sharing' className='text-verde hover:tracking-wider transition-all cursor-pointer text-xl font-bold'>Datos usados</a>
+              {/* <a target='_blank' href='https://drive.google.com/drive/folders/1P5F5IFjEl2L8CnrFF1rivHibRf03nmVC?usp=sharing' className='text-verde hover:tracking-wider transition-all cursor-pointer text-xl font-bold'>Datos usados</a> */}
 
             </div>
 
