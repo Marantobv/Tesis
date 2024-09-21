@@ -31,7 +31,7 @@ function Contact() {
             <div className='container mx-auto max-w-[1200px]'>
                 <div className='flex lg:flex-row flex-col justify-center items-center gap-[40px]'>
                     <div>
-                        <h1 className='lg:text-7xl text-5xl font-bold uppercase font-primary text-naranja text-center'>Predicción para el día de mañana</h1>
+                        <h1 className='lg:text-7xl text-5xl font-bold uppercase font-primary text-naranja text-center'>Predicción para el día 01-09-2024</h1>
                         {prediction ? (
                             <div className='flex flex-col items-center justify-center mt-10'>
                                 <h2 className='font-tertiary text-4xl text-morado'>Fecha: <span className='font-bold'>{prediction.last_day}</span></h2>

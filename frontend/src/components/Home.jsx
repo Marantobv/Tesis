@@ -10,8 +10,8 @@ import {Link} from 'react-scroll'
 function Home() {
   return (
     <div className='h-screen flex' id='home'>
-      <div className='flex flex-1 items-center justify-center lg:gap-[100px] max-w-full'>
-        <div className='flex-1 flex-col lg:justify-center lg:text-left text-center p-16'>
+      <div className='flex lg:flex-1 items-center justify-center lg:gap-[100px] max-w-full'>
+        <div className='lg:flex-1 flex-col lg:justify-center lg:text-left text-center p-16'>
           <motion.h2 variants={fade("up", 1)} initial={"init"} whileInView={"view"} className='lg:text-7xl text-5xl font-bold uppercase font-primary text-morado'>
           Modelo Predictivo de Índices Bursátiles
           </motion.h2>
@@ -35,26 +35,6 @@ function Home() {
             <p className='lg:text-2xl text-xl mt-6 lg:my-0 font-tertiary font-light text-morado'>
             Utilizando Procesamiento de Lenguaje Natural (PLN) para predecir índices del mercado de valores y optimizar decisiones de inversión basadas en el análisis de sentimientos.
             </p>
-            {/* <div className='flex lg:justify-start justify-center gap-7 lg:my-6 mt-6 mb-8'>
-              <a href='https://github.com/OsmarGilCusipuma' target='_blank' aria-label='GitHub'>
-                <BsGithub className='cursor-pointer onhover' size={32}></BsGithub>
-              </a>
-              <a href='https://www.linkedin.com/in/osmar-antony-gil-cusipuma-97097a262/' target='_blank'>
-                <BsLinkedin className='cursor-pointer onhover' size={32} aria-label='Linkedin'></BsLinkedin>
-              </a>
-              <a href='https://www.facebook.com/antonygc2002/' target='_blank'>
-                <BsFacebook className='cursor-pointer onhover' size={32} aria-label='Facebook'></BsFacebook>
-              </a>
-              <a href='https://wa.link/1ayc0i' target='_blank'>
-                <BsWhatsapp className='cursor-pointer onhover' size={32} aria-label='Whatsapp'></BsWhatsapp>
-              </a>
-            </div> */}
-            {/* <div className='flex lg:justify-start justify-center items-center lg:gap-8 gap-6 mt-8'>
-              <a href='https://wa.link/1ayc0i' target='_blank'>
-                <button type='button' className='btn font-tertiary gradient'>Regístrate</button>
-              </a>
-              <a target='_blank' href='/Gil Cusipuma.pdf' className=' hover:tracking-wider transition-all cursor-pointer text-xl font-bold text-morado'>Inicia sesión</a>
-            </div> */}
           </motion.div>
         </div>
         <div className='flex-1'>
