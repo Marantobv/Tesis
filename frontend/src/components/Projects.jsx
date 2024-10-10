@@ -5,14 +5,19 @@ function Projects() {
 
   // Obtiene noticias de dos páginas (3 noticias por página, total 6)
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0]; // Fecha de hoy en formato "2024-09-21"
+    const date = new Date();
+    date.setDate(date.getDate() - 1);
+    const yesterday = date.toISOString().split('T')[0]; // Date in "yyyy-mm-dd" format
+    console.log(yesterday);
+    
+    
     const fetchNews = async () => {
       try {
         const response1 = await fetch(
-          `https://api.marketaux.com/v1/news/all?countries=us&language=en&symbols=TSLA,AMZN,MSFT,AAPL,NVDA,META,GOOGL,JPM,V&filter_entities=true&published_on=${today}&page=1&group_similar=false&api_token=Y4tHtjZ8iP876QzQpMrVzsM08xnoK1HdEA2E5V39`
+          `https://api.marketaux.com/v1/news/all?countries=us&language=en&symbols=TSLA,AMZN,MSFT,AAPL,NVDA,META,GOOGL,JPM,V&filter_entities=true&published_on=${yesterday}&page=1&group_similar=false&api_token=Y4tHtjZ8iP876QzQpMrVzsM08xnoK1HdEA2E5V39`
         );
         const response2 = await fetch(
-          `https://api.marketaux.com/v1/news/all?countries=us&language=en&symbols=TSLA,AMZN,MSFT,AAPL,NVDA,META,GOOGL,JPM,V&filter_entities=true&published_on=${today}&page=2&group_similar=false&api_token=Y4tHtjZ8iP876QzQpMrVzsM08xnoK1HdEA2E5V39`
+          `https://api.marketaux.com/v1/news/all?countries=us&language=en&symbols=TSLA,AMZN,MSFT,AAPL,NVDA,META,GOOGL,JPM,V&filter_entities=true&published_on=${yesterday}&page=2&group_similar=false&api_token=Y4tHtjZ8iP876QzQpMrVzsM08xnoK1HdEA2E5V39`
         );
 
         const data1 = await response1.json();
@@ -33,7 +38,7 @@ function Projects() {
         {news.map((item, index) => (
           <div key={index} className='card border lg:p-4 p-2'>
             <img src={item.image_url} alt={item.title} className='mb-4 h-[200px] object-cover' />
-            {/* <h2 className='lg:text-lg text-base font-bold mb-2'>{item.title}</h2> */}
+            <h2 className='lg:text-lg text-base font-bold mb-2'>{item.title}</h2>
             <a className='lg:text-lg text-base font-bold mb-2 cursor-pointer hover:underline text-morado font-secondary' target='_blank' href={item.url}>{item.title}</a>
             <p className='mb-2 font-secondary text-morado'>{item.description}</p>
             <p className='text-sm text-gray-500'>{item.source}</p>
