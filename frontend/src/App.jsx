@@ -6,6 +6,7 @@ import About from './components/About'
 import Knowledge from './components/Knowledge'
 import Projects from './components/Projects'
 import Charts from './components/Charts'
+import NewsAndSentiment from './components/NewsAndSentiment'
 
 function App() {
 
@@ -17,7 +18,8 @@ function App() {
       <About></About>
       <Charts></Charts>
       <Projects></Projects>
-      <Contact></Contact>
+      {/* <Contact></Contact> */}
+      <NewsAndSentiment></NewsAndSentiment>
       <div className='h-[200px]'></div>
     </div>
   )

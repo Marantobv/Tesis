@@ -23,7 +23,7 @@ function Navbar() {
           <Link activeClass='is-active' className='cursor-pointer text-morado' to='projects' spy={true} smooth={true} offset={50} duration={500}>
             <FaRegNewspaper  size={24}></FaRegNewspaper>
           </Link>
-          <Link activeClass='is-active' className='cursor-pointer text-morado' to='contact' spy={true} smooth={true} offset={50} duration={500}>
+          <Link activeClass='is-active' className='cursor-pointer text-morado' to='news-and-sentiment' spy={true} smooth={true} offset={50} duration={500}>
             <FaRegCalendarCheck size={24}></FaRegCalendarCheck>
           </Link>
         </div>

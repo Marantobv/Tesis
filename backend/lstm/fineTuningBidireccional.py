@@ -17,7 +17,7 @@ torch.cuda.manual_seed(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-df = pd.read_csv('SP500_FullSentiment.csv')
+df = pd.read_csv('SP500_FullSentimentReduced.csv')
 
 df_train = df[df['Date'] < '2021-01-01']
 df_finetune = df[df['Date'] >= '2021-01-01']
@@ -28,13 +28,13 @@ split_index = int(len(df_finetune) * validation_split)
 df_validation = df_finetune.iloc[:split_index]
 df_test = df_finetune.iloc[split_index:]
 
-features_train = df_train[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']].values
+features_train = df_train[['Open', 'Close']].values
 target_train = df_train[['Close']].values
 
-features_validation = df_validation[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'Sentiment']].values
+features_validation = df_validation[['Open', 'Close', 'Sentiment']].values
 target_validation = df_validation[['Close']].values
 
-features_test = df_test[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'Sentiment']].values
+features_test = df_test[['Open', 'Close', 'Sentiment']].values
 target_test = df_test[['Close']].values
 
 scaler_features_train = MinMaxScaler(feature_range=(-1, 1))
@@ -156,6 +156,8 @@ predicted_close_price = scaler_close_train.inverse_transform(prediction.cpu().nu
 print(f"Predicción del precio de cierre: {predicted_close_price[0][0]}")
 
 #torch.save(model.state_dict(), 'fineTuning_model.pth')
+
+
 
 def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
