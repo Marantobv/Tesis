@@ -13,7 +13,7 @@ function NewsAndSentiment() {
     let allNews = [];
     let errorOccurred = false;
 
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 15; i++) {
       try {
         const response = await axios.get('https://api.marketaux.com/v1/news/all', {
           params: {
@@ -24,7 +24,7 @@ function NewsAndSentiment() {
             published_on: '2024-10-20',
             page: i,
             group_similar: false,
-            api_token: 'aKYI2pUA2GE1pnbWPPpLjJVJTuMuh5MVDvfKG5MY'
+            api_token: 'YgCfzMKdyoSQiOjzRaksdYgJFfuPMmO9Njfgwvrq'
           }
         });
         const newsData = response.data.data.map(news => ({
@@ -51,6 +51,12 @@ function NewsAndSentiment() {
   };
 
   const addSentimentData = async () => {
+
+    if (!openPrice || !closePrice) {
+      setMessage('Por favor ingrese tanto el precio de apertura como el precio de cierre.');
+      return; // Detener la ejecución si los campos están vacíos
+    }
+
     try {
       const data = {
         open_price: openPrice,
@@ -61,7 +67,9 @@ function NewsAndSentiment() {
       setMessage('Datos agregados al CSV correctamente');
       setSentiment(response.data.average_sentiment_day);
     } catch (error) {
-      setMessage('Error al agregar datos al CSV');
+      console.log(error.response.data.message);
+      
+      setMessage(`${error.response.data.message}`);
     }
   };
 
@@ -91,21 +99,27 @@ function NewsAndSentiment() {
 
         <div className='p-4'>
           <h2 className='text-5xl font-bold mb-4 font-tertiary text-morado'>Ingrese el precio de apertura y cierre de hoy</h2>
-          <div className='mb-4'>
+          <div className='mb-4 flex justify-center gap-16'>
+            <div className='flex flex-col text-left'>
+            <label>Precio de apertura</label>
             <input
               type='text'
               placeholder='Precio de apertura'
               value={openPrice}
               onChange={(e) => setOpenPrice(e.target.value)}
-              className='border p-2 mr-2'
+              className='border p-2 mr-2 border-cyan-900 rounded'
             />
+            </div>
+            <div  className='flex flex-col text-left'>
+            <label>Precio de cierre</label>
             <input
               type='text'
               placeholder='Precio de cierre'
               value={closePrice}
               onChange={(e) => setClosePrice(e.target.value)}
-              className='border p-2 mr-2'
+              className='border p-2 mr-2 border-cyan-900 rounded'
             />
+            </div>
           </div>
           <button onClick={addSentimentData} className='bg-green-800 text-white px-4 py-2 rounded font-bold'>
             Agregar datos al CSV

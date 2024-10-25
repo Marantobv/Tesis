@@ -3,6 +3,7 @@
 *.pkl
 *.pth
 *.bin
+*.png
 
 .vscode
 # Byte-compiled / optimized / DLL files

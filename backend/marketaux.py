@@ -19,10 +19,15 @@ api_key_14 = "YSrYCTPq2xJWYHGLsNPK8c64DjC0Tyfsi5EtUU9G"
 api_key_15 = "ODobOJgwuh43qCxZMGhyl00rU8o7nvws3MyVz1pP"
 api_key_16 = "aKYI2pUA2GE1pnbWPPpLjJVJTuMuh5MVDvfKG5MY"
 
+api_key_17 = "BCeoo9GF9reW69NU7hmFUznEEMK79egl4wWw44b6"
+api_key_18 = "gKaQku8XA0vKDZk8bQAGG4adOWhB7sxHDXGK5WuT"
+api_key_19 = "mpj6o54lZ8DZJKJS3t65vIfLfZfl5WAFyPnehPRa"
+api_key_20 = "vVKNV51Yl3p0LukGL7dLg5v2db6kTrGF3Xok8vUE"
+
 def get_news_for_date(date, pages):
     news_list = []
     for page in range(1, pages + 1):
-        url = f"https://api.marketaux.com/v1/news/all?countries=us&language=en&symbols=TSLA,AMZN,MSFT,AAPL,NVDA,META,GOOGL,JPM,V&filter_entities=true&published_on={date}&page={page}&group_similar=false&api_token={api_key_10}"
+        url = f"https://api.marketaux.com/v1/news/all?countries=us&language=en&symbols=TSLA,AMZN,MSFT,AAPL,NVDA,META,GOOGL,JPM,V&filter_entities=true&published_on={date}&page={page}&group_similar=false&api_token={api_key_20}"
         print(url)
         response = requests.get(url)
         data = response.json()
@@ -34,8 +39,7 @@ def get_news_for_date(date, pages):
             })
     return news_list
 
-start_date = datetime.strptime("2024-08-15", "%Y-%m-%d")
-total_requests_per_day = 25
+start_date = datetime.strptime("2024-10-24", "%Y-%m-%d")
 total_days = 1
 max_requests_per_day = 25
 
@@ -58,7 +62,7 @@ while requests_made < max_requests_per_day:
         
         current_date += timedelta(days=1)
 
-with open("10.json", "w") as file:
+with open("2.json", "w") as file:
     json.dump(all_news, file, indent=4)
 
 print("News data saved to news_data.json")

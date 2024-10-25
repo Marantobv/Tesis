@@ -10,7 +10,7 @@ model.load_state_dict(torch.load(config.MODEL_PATH))
 model.to(device)
 model.eval()
 
-with open('../combiSINREPE.json', 'r') as file:
+with open('../combinadoTODO.json', 'r') as file:
     data = json.load(file)
 
 df = pd.DataFrame(data)

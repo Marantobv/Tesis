@@ -118,36 +118,34 @@ def add_sentiment_data():
     open_price = data.get('open_price')
     close_price = data.get('close_price')
 
+    # Cargar las noticias clasificadas
     with open('classified_news.json', 'r') as file:
         classified_news = json.load(file)
 
     sentiment_values = {'positive': 1, 'neutral': 0, 'negative': -1}
-
-    total_sentiment = 0
+    total_sentiment = sum(sentiment_values[news['sentiment']] for news in classified_news)
     sentiment_count = len(classified_news)
-
-    for news in classified_news:
-        total_sentiment += sentiment_values[news['sentiment']]
-
-    if sentiment_count > 0:
-        average_sentiment_day = total_sentiment / sentiment_count
-    else:
-        average_sentiment_day = 0
+    average_sentiment_day = total_sentiment / sentiment_count if sentiment_count > 0 else 0
 
     today_date = datetime.today().strftime('%Y-%m-%d')
-
-    csv_file = 'SP500_FullSentimentReduced.csv'
+    csv_file = 'SP500_Sentimentv2.csv'
+    
+    # Leer el archivo CSV y verificar si la fecha actual ya existe
     df = pd.read_csv(csv_file)
+    if today_date in df['Date'].values:
+        return jsonify({
+            'message': f'Los datos de la fecha {today_date} ya están registrados',
+            'average_sentiment_day': average_sentiment_day
+        }), 400
 
+    # Crear una nueva fila y agregarla al CSV si no existe la fecha
     new_row = {
         'Date': today_date,
         'Open': open_price,
         'Close': close_price,
         'Sentiment': average_sentiment_day
     }
-
     df = df._append(new_row, ignore_index=True)
-
     df.to_csv(csv_file, index=False)
 
     return jsonify({
@@ -165,7 +163,7 @@ def predict():
     torch.cuda.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-    df = pd.read_csv('SP500_FullSentimentReduced.csv')
+    df = pd.read_csv('SP500_Sentimentv2.csv')
 
     df_train = df[df['Date'] < '2021-01-01']
     df_finetune = df[df['Date'] >= '2021-01-01']
@@ -186,7 +184,7 @@ def predict():
     scaled_features_finetune = scaler_features_finetune.fit_transform(features_finetune)
     scaled_close_finetune = scaler_close_train.transform(target_finetune)
 
-    SEQ_LENGTH = 60
+    SEQ_LENGTH = 30
 
     X_train, y_train = create_sequences(scaled_features_train, scaled_close_train, SEQ_LENGTH)
     X_finetune, y_finetune = create_sequences(scaled_features_finetune, scaled_close_finetune, SEQ_LENGTH)

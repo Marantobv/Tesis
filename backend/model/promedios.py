@@ -29,7 +29,7 @@ promedio_sentimientos = {fecha: sum(sentimientos) / len(sentimientos)
 
 df_sentimientos = pd.DataFrame(list(promedio_sentimientos.items()), columns=['Date', 'Sentiment'])
 
-df_sp500 = pd.read_csv('../lstm/SP500_Sentimentv2.csv')
+df_sp500 = pd.read_csv('./SP500_FullSentimentReduced2.csv')
 
 df_combinado = pd.merge(df_sp500, df_sentimientos, on='Date', how='left')
 
