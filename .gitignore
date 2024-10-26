@@ -15,6 +15,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
+dist/
 downloads/
 eggs/
 .eggs/
@@ -47,5 +48,6 @@ models/
 # Node.js
 node_modules/
 build/
+dist/
 public/
 .netlify/
