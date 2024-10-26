@@ -38,7 +38,6 @@ function Projects() {
         {news.map((item, index) => (
           <div key={index} className='card border lg:p-4 p-2'>
             <img src={item.image_url} alt={item.title} className='mb-4 h-[200px] object-cover' />
-            <h2 className='lg:text-lg text-base font-bold mb-2'>{item.title}</h2>
             <a className='lg:text-lg text-base font-bold mb-2 cursor-pointer hover:underline text-morado font-secondary' target='_blank' href={item.url}>{item.title}</a>
             <p className='mb-2 font-secondary text-morado'>{item.description}</p>
             <p className='text-sm text-gray-500'>{item.source}</p>

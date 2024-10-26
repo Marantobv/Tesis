@@ -9,9 +9,19 @@ function NewsAndSentiment() {
   const [prediction, setPrediction] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const todayDate = new Date().toISOString().split('T')[0];
+
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  const tomorrowDate = tomorrow.toISOString().split('T')[0];
+
   const classifyNews = async () => {
     let allNews = [];
     let errorOccurred = false;
+
+    // Obtener la fecha de hoy en formato YYYY-MM-DD
 
     for (let i = 1; i <= 5; i++) {
       try {
@@ -21,7 +31,7 @@ function NewsAndSentiment() {
             language: 'en',
             symbols: 'TSLA,AMZN,MSFT,AAPL,NVDA,META,GOOGL,JPM,V',
             filter_entities: true,
-            published_on: '2024-10-20',
+            published_on: todayDate,  // Usar la fecha de hoy
             page: i,
             group_similar: false,
             api_token: 'YgCfzMKdyoSQiOjzRaksdYgJFfuPMmO9Njfgwvrq'
@@ -30,7 +40,7 @@ function NewsAndSentiment() {
         const newsData = response.data.data.map(news => ({
           title: news.title,
           description: news.description,
-          date: '2024-10-20'
+          date: todayDate  // Usar la fecha de hoy
         }));
         allNews = [...allNews, ...newsData];
       } catch (error) {
@@ -43,7 +53,7 @@ function NewsAndSentiment() {
     if (!errorOccurred) {
       try {
         //await axios.post('http://127.0.0.1:5000/classify_news', allNews);
-        await axios.post('https://tesis-c2nb.onrender.com/classify_news', allNews);
+        await axios.post('http://127.0.0.1:5000/classify_news', allNews);
         setMessage('Noticias clasificadas y guardadas correctamente');
       } catch (error) {
         setMessage('Error al clasificar las noticias');
@@ -64,7 +74,7 @@ function NewsAndSentiment() {
         close_price: closePrice
       };
 
-      const response = await axios.post('https://tesis-c2nb.onrender.com/add_sentiment_data', data);
+      const response = await axios.post('http://127.0.0.1:5000/add_sentiment_data', data);
       setMessage('Datos agregados al CSV correctamente');
       setSentiment(response.data.average_sentiment_day);
     } catch (error) {
@@ -77,7 +87,7 @@ function NewsAndSentiment() {
   const predictClosePrice = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('https://tesis-c2nb.onrender.com/predict_close_price');
+      const response = await axios.get('http://127.0.0.1:5000/predict_close_price');
       setPrediction(response.data.predicted_close_price);
       setMessage('Predicción obtenida correctamente');
     } catch (error) {
@@ -90,6 +100,14 @@ function NewsAndSentiment() {
   return (
     <div className='section' id='news-and-sentiment'>
       <div className='container mx-auto max-w-[1200px] text-center text-morado'>
+
+        <div>
+          <h2 className='font-bold text-4xl font-secondary'>Guía de usuario</h2>
+          <p className='font-bold text-lg font-secondary text-black'>SP500: <span className='font-normal'>Es un indicador bursátil que mide el rendimiento de las 500 empresas más grandes y representativas que cotizan en las bolsas de Estados Unidos (principalmente NYSE y NASDAQ). Es ampliamente utilizado como referencia del desempeño general del mercado de valores y de la economía estadounidense.</span></p>
+          <p className='font-bold text-lg font-secondary text-black'>Clasificación de noticias: <span className='font-normal'>Este botón se usa para obtener noticias del día de hoy y generar posteriormente el índice de sentimientos para el día de hoy. Se debe mostrar el mensaje de confirmación para continuar</span></p>
+          <p className='font-bold text-lg font-secondary text-black'>Agregar datos al CSV: <span className='font-normal'>Este botón se usa para calcular el índice de sentimiento y almacenarlo junto a los datos de precios del SP500. En caso ya se haya generado los datos para hoy se muestra un mensaje de error. Para obtener los precios de cierre y apertura ingresar al siguiente link: <a target='_blank' className='text-blue-500' href='https://finance.yahoo.com/quote/%5ESPX/history/'>Precios SP500</a></span></p>
+          <p className='font-bold text-lg font-secondary text-black'>Predecir precio de cierre: <span className='font-normal'>Este botón muestra la predicción para el día de mañana. </span></p>
+        </div>
 
         <div className='p-4'>
           <h2 className='text-5xl font-bold mb-4 font-tertiary'>Clasificación de Noticias y Sentimiento Promedio</h2>
@@ -105,7 +123,7 @@ function NewsAndSentiment() {
             <label>Precio de apertura</label>
             <input
               type='text'
-              placeholder='Precio de apertura'
+              placeholder='Ej. 5620.45'
               value={openPrice}
               onChange={(e) => setOpenPrice(e.target.value)}
               className='border p-2 mr-2 border-cyan-900 rounded'
@@ -115,7 +133,7 @@ function NewsAndSentiment() {
             <label>Precio de cierre</label>
             <input
               type='text'
-              placeholder='Precio de cierre'
+              placeholder='Ej. 5650.95'
               value={closePrice}
               onChange={(e) => setClosePrice(e.target.value)}
               className='border p-2 mr-2 border-cyan-900 rounded'
@@ -134,7 +152,7 @@ function NewsAndSentiment() {
         )}
 
         <div className='p-4'>
-          <h2 className='text-5xl font-bold mb-4 font-tertiary text-morado'>Obtener predicción para mañana</h2>
+          <h2 className='text-5xl font-bold mb-4 font-tertiary text-morado'>Obtener predicción para mañana {tomorrowDate}</h2>
           <button onClick={predictClosePrice} className='bg-red-800 text-white px-4 py-2 rounded font-bold'>
             Predecir precio de cierre
           </button>
