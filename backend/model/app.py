@@ -1,73 +1,58 @@
-import config
+import time
 import torch
 import flask
-import time
-from flask import Flask
-from flask import request
-from model import BERTBaseUncased
-import functools
-import torch.nn as nn
+from flask import Flask, request
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import config
+import transformers
 
 
 app = Flask(__name__)
 
-MODEL = None
 DEVICE = config.DEVICE
-PREDICTION_DICT = dict()
+MODEL_NAME = "MarantoBv/BERT_Model"  # Reemplaza con tu nombre de usuario y el nombre del modelo en Hugging Face
 
+# Cargar el modelo y el tokenizador directamente desde Hugging Face
+tokenizer = config.TOKENIZER
+MODEL = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
+MODEL.to(DEVICE)
+MODEL.eval()
 
 def sentence_prediction(sentence):
-    tokenizer = config.TOKENIZER
-    max_len = config.MAX_LEN
-    review = str(sentence)
-    review = " ".join(review.split())
-
+    # Tokenización y preparación de datos
     inputs = tokenizer.encode_plus(
-        review, None, add_special_tokens=True, max_length=max_len
+        sentence,
+        add_special_tokens=True,
+        max_length=config.MAX_LEN,
+        padding='max_length',
+        truncation=True,
+        return_tensors="pt"
     )
 
-    ids = inputs["input_ids"]
-    mask = inputs["attention_mask"]
-    token_type_ids = inputs["token_type_ids"]
+    # Mover los tensores al dispositivo configurado
+    ids = inputs["input_ids"].to(DEVICE)
+    mask = inputs["attention_mask"].to(DEVICE)
 
-    padding_length = max_len - len(ids)
-    ids = ids + ([0] * padding_length)
-    mask = mask + ([0] * padding_length)
-    token_type_ids = token_type_ids + ([0] * padding_length)
+    with torch.no_grad():
+        # Predicción
+        outputs = MODEL(input_ids=ids, attention_mask=mask)
+        predictions = torch.softmax(outputs.logits, dim=1).cpu().numpy()[0]
 
-    ids = torch.tensor(ids, dtype=torch.long).unsqueeze(0)
-    mask = torch.tensor(mask, dtype=torch.long).unsqueeze(0)
-    token_type_ids = torch.tensor(token_type_ids, dtype=torch.long).unsqueeze(0)
-
-    ids = ids.to(DEVICE, dtype=torch.long)
-    token_type_ids = token_type_ids.to(DEVICE, dtype=torch.long)
-    mask = mask.to(DEVICE, dtype=torch.long)
-
-    outputs = MODEL(ids=ids, mask=mask, token_type_ids=token_type_ids)
-
-    outputs = torch.softmax(outputs, dim=1).cpu().detach().numpy()
-    return outputs[0]
-
+    return predictions
 
 @app.route("/predict")
 def predict():
     sentence = request.args.get("sentence")
     start_time = time.time()
     predictions = sentence_prediction(sentence)
-    response = {}
-    response["response"] = {
+    response = {
         "positive": str(predictions[2]),  # Probabilidad de la clase positiva
         "neutral": str(predictions[1]),   # Probabilidad de la clase neutral
         "negative": str(predictions[0]),  # Probabilidad de la clase negativa
-        "sentence": str(sentence),
+        "sentence": sentence,
         "time_taken": str(time.time() - start_time),
     }
-    return flask.jsonify(response)
-
+    return flask.jsonify({"response": response})
 
 if __name__ == "__main__":
-    MODEL = BERTBaseUncased()
-    MODEL.load_state_dict(torch.load(config.MODEL_PATH, map_location=DEVICE))
-    MODEL.to(DEVICE)
-    MODEL.eval()
-    app.run(host="0.0.0.0", port="9999")
+    app.run(host="0.0.0.0", port=9999)

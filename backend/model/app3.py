@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from datetime import datetime
 from transformers import BertTokenizer
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from model import BERTBaseUncased
 import config
 from flask_cors import CORS  # Importar CORS
@@ -44,13 +45,13 @@ class BiLSTMModel(nn.Module):
         out = out[:, -1, :]
         out = self.fc(out)
         return out
-device = torch.device(config.DEVICE)
-model = BERTBaseUncased()
-model.load_state_dict(torch.load(config.MODEL_PATH))
+MODEL_NAME = "MarantoBv/BERT_Model"  # Reemplaza con tu nombre de modelo en Hugging Face
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+
 model.to(device)
 model.eval()
-
-tokenizer = BertTokenizer.from_pretrained(config.BERT_PATH)
 
 def preprocess_text(text):
     if isinstance(text, str):
@@ -63,25 +64,24 @@ def classify_text(model, text, tokenizer, device):
         text,
         None,
         add_special_tokens=True,
-        max_length=config.MAX_LEN,
+        max_length=128,  # Puedes cambiar esto por config.MAX_LEN si tienes un límite específico
         padding='max_length',
-        truncation=True
+        truncation=True,
+        return_tensors="pt"
     )
 
-    ids = torch.tensor(inputs['input_ids'], dtype=torch.long).unsqueeze(0)
-    mask = torch.tensor(inputs['attention_mask'], dtype=torch.long).unsqueeze(0)
-    token_type_ids = torch.tensor(inputs['token_type_ids'], dtype=torch.long).unsqueeze(0)
-
-    ids = ids.to(device, dtype=torch.long)
-    mask = mask.to(device, dtype=torch.long)
-    token_type_ids = token_type_ids.to(device, dtype=torch.long)
+    ids = inputs['input_ids'].to(device)
+    mask = inputs['attention_mask'].to(device)
 
     with torch.no_grad():
-        outputs = model(ids=ids, mask=mask, token_type_ids=token_type_ids)
+        outputs = model(input_ids=ids, attention_mask=mask)
+        logits = outputs.logits
 
-    outputs = torch.sigmoid(outputs).cpu().detach().numpy()
-    sentiment = outputs.argmax(axis=1).item()
+    # Aplicar softmax para obtener probabilidades
+    probabilities = torch.softmax(logits, dim=1).cpu().numpy()
+    sentiment = probabilities.argmax(axis=1).item()
 
+    # Mapear la clase de salida a etiquetas
     if sentiment == 0:
         return "negative"
     elif sentiment == 1:

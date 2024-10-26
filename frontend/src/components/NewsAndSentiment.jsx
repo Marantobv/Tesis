@@ -13,7 +13,7 @@ function NewsAndSentiment() {
     let allNews = [];
     let errorOccurred = false;
 
-    for (let i = 1; i <= 15; i++) {
+    for (let i = 1; i <= 5; i++) {
       try {
         const response = await axios.get('https://api.marketaux.com/v1/news/all', {
           params: {
