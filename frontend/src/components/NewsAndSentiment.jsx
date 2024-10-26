@@ -42,7 +42,8 @@ function NewsAndSentiment() {
 
     if (!errorOccurred) {
       try {
-        await axios.post('http://127.0.0.1:5000/classify_news', allNews);
+        //await axios.post('http://127.0.0.1:5000/classify_news', allNews);
+        await axios.post('https://tesis-c2nb.onrender.com/classify_news', allNews);
         setMessage('Noticias clasificadas y guardadas correctamente');
       } catch (error) {
         setMessage('Error al clasificar las noticias');
@@ -63,7 +64,7 @@ function NewsAndSentiment() {
         close_price: closePrice
       };
 
-      const response = await axios.post('http://127.0.0.1:5000/add_sentiment_data', data);
+      const response = await axios.post('https://tesis-c2nb.onrender.com/add_sentiment_data', data);
       setMessage('Datos agregados al CSV correctamente');
       setSentiment(response.data.average_sentiment_day);
     } catch (error) {
@@ -76,7 +77,7 @@ function NewsAndSentiment() {
   const predictClosePrice = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('http://127.0.0.1:5000/predict_close_price');
+      const response = await axios.get('https://tesis-c2nb.onrender.com/predict_close_price');
       setPrediction(response.data.predicted_close_price);
       setMessage('Predicción obtenida correctamente');
     } catch (error) {
