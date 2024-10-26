@@ -39,9 +39,9 @@ six==1.16.0
 sympy==1.12
 threadpoolctl==3.5.0
 tokenizers==0.20.0
-torch==2.4.1+cu124
-torchaudio==2.4.1+cu124
-torchvision==0.19.1+cu124
+torch==2.4.1
+torchaudio==2.4.1
+torchvision==0.19.1
 tqdm==4.66.5
 transformers==4.45.2
 typing_extensions==4.12.2
