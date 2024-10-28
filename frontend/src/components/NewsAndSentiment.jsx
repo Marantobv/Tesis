@@ -21,8 +21,6 @@ function NewsAndSentiment() {
     let allNews = [];
     let errorOccurred = false;
 
-    // Obtener la fecha de hoy en formato YYYY-MM-DD
-
     for (let i = 1; i <= 5; i++) {
       try {
         const response = await axios.get('https://api.marketaux.com/v1/news/all', {
@@ -31,7 +29,7 @@ function NewsAndSentiment() {
             language: 'en',
             symbols: 'TSLA,AMZN,MSFT,AAPL,NVDA,META,GOOGL,JPM,V',
             filter_entities: true,
-            published_on: todayDate,  // Usar la fecha de hoy
+            published_on: todayDate,
             page: i,
             group_similar: false,
             api_token: 'YgCfzMKdyoSQiOjzRaksdYgJFfuPMmO9Njfgwvrq'
@@ -40,7 +38,7 @@ function NewsAndSentiment() {
         const newsData = response.data.data.map(news => ({
           title: news.title,
           description: news.description,
-          date: todayDate  // Usar la fecha de hoy
+          date: todayDate 
         }));
         allNews = [...allNews, ...newsData];
       } catch (error) {
@@ -52,7 +50,6 @@ function NewsAndSentiment() {
 
     if (!errorOccurred) {
       try {
-        //await axios.post('http://127.0.0.1:5000/classify_news', allNews);
         await axios.post('http://127.0.0.1:5000/classify_news', allNews);
         setMessage('Noticias clasificadas y guardadas correctamente');
       } catch (error) {
@@ -65,7 +62,7 @@ function NewsAndSentiment() {
 
     if (!openPrice || !closePrice) {
       setMessage('Por favor ingrese tanto el precio de apertura como el precio de cierre.');
-      return; // Detener la ejecución si los campos están vacíos
+      return; 
     }
 
     try {
