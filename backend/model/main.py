@@ -45,10 +45,14 @@ class BiLSTMModel(nn.Module):
         out = out[:, -1, :]
         out = self.fc(out)
         return out
-MODEL_NAME = "MarantoBv/BERT_Model"  # Reemplaza con tu nombre de modelo en Hugging Face
+MODEL_NAME = "MarantoBv/BERT_Model"  # Reemplaza con el nombre de tu modelo en Hugging Face
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
+
+# Ignora las capas no coincidentes si es necesario
+model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, ignore_mismatched_sizes=True)
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+
+model.to(device)
 
 model.to(device)
 model.eval()
