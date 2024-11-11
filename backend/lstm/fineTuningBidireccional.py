@@ -8,6 +8,7 @@ import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import matplotlib.pyplot as plt
 import random
+import matplotlib.dates as mdates
 
 seed = 42
 random.seed(seed)
@@ -18,9 +19,29 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 df = pd.read_csv('SP500_FullSentimentReduced.csv')
+df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d')
 
 df_train = df[df['Date'] < '2021-01-01']
 df_finetune = df[df['Date'] >= '2021-01-01']
+
+df['SMA_20'] = df['Close'].rolling(window=20).mean()
+df['SMA_50'] = df['Close'].rolling(window=50).mean()
+
+df['Signal'] = 0
+df['Signal'][df['SMA_20'] > df['SMA_50']] = 1  # Ciclo alcista
+df['Signal'][df['SMA_20'] < df['SMA_50']] = -1 # Ciclo bajista
+# Inicio Volatibilidad
+
+# df['DateFormat'] = pd.to_datetime(df['Date'])
+
+# df['Log_Return'] = np.log(df['Close'] / df['Close'].shift(1))
+
+# df['Volatility'] = df['Log_Return'].rolling(window=21).std() * np.sqrt(252)
+
+# df['Volatility'].fillna(0, inplace=True)
+
+# Fin Volatibilidad
+
 
 validation_split = 0.8 
 split_index = int(len(df_finetune) * validation_split)
@@ -29,12 +50,15 @@ df_validation = df_finetune.iloc[:split_index]
 df_test = df_finetune.iloc[split_index:]
 
 features_train = df_train[['Open', 'Close']].values
+#features_train = df_train[['Open', 'Close', 'Volatility', 'Month', 'DayOfWeek']].values
 target_train = df_train[['Close']].values
 
 features_validation = df_validation[['Open', 'Close', 'Sentiment']].values
+#features_validation = df_validation[['Open', 'Close', 'Sentiment', 'Volatility', 'Month', 'DayOfWeek']].values
 target_validation = df_validation[['Close']].values
 
 features_test = df_test[['Open', 'Close', 'Sentiment']].values
+#features_test = df_test[['Open', 'Close', 'Sentiment', 'Volatility', 'Month', 'DayOfWeek']].values
 target_test = df_test[['Close']].values
 
 scaler_features_train = MinMaxScaler(feature_range=(-1, 1))
@@ -79,7 +103,7 @@ class BiLSTMModel(nn.Module):
         self.num_layers = num_layers
         self.lstm = nn.LSTM(input_size, hidden_size, num_layers, 
                             batch_first=True, bidirectional=True)
-        self.fc = nn.Linear(hidden_size * 2, output_size)  # *2 para bidireccional
+        self.fc = nn.Linear(hidden_size * 2, output_size)
     
     def forward(self, x):
         h0 = torch.zeros(self.num_layers * 2, x.size(0), self.hidden_size).to(x.device)
@@ -134,11 +158,9 @@ for epoch in range(EPOCHS_FINE_TUNE):
     for sequences, labels in validation_loader:
         sequences, labels = sequences.to(device), labels.to(device)
         
-        # Forward pass
         outputs = model(sequences)
         loss = criterion(outputs, labels)
         
-        # Backward pass
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -156,8 +178,6 @@ predicted_close_price = scaler_close_train.inverse_transform(prediction.cpu().nu
 print(f"Predicción del precio de cierre: {predicted_close_price[0][0]}")
 
 #torch.save(model.state_dict(), 'fineTuning_model.pth')
-
-
 
 def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
@@ -188,31 +208,62 @@ print(f"MAPE: {mape:.2f}%")
 print(f"MAE: {mae:.2f}")
 print(f"RMSE: {rmse:.2f}")
 
-plt.figure(figsize=(12, 6))
-plt.plot(test_dates, targets_original, label='Real Price', color='blue')
-plt.plot(test_dates, predictions_original, label='Predicted Price', color='red')
-plt.title('Real vs Predicted Stock Prices')
-plt.xlabel('Time')
-plt.ylabel('Price')
+# plt.figure(figsize=(14, 7))
+# plt.plot(df['Date'], df['Close'], label='Precio de Cierre', color='black')
+# plt.plot(df['Date'], df['SMA_20'], label='Media Móvil de 20 días', color='blue')
+# plt.plot(df['Date'], df['SMA_50'], label='Media Móvil de 50 días', color='red')
+# plt.fill_between(df['Date'], df['Close'].min(), df['Close'].max(), 
+#                  where=(df['Signal'] == 1), color='green', alpha=0.1, label='Ciclo Alcista')
+# plt.fill_between(df['Date'], df['Close'].min(), df['Close'].max(), 
+#                  where=(df['Signal'] == -1), color='red', alpha=0.1, label='Ciclo Bajista')
+# plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+# plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=6))  # Muestra cada 6 meses, ajusta según prefieras
+# plt.xticks(rotation=45)  # Rota las etiquetas del eje X para que no se superpongan
 
-plt.xticks(rotation=45)
-plt.xticks(ticks=np.arange(0, len(test_dates), step=10), labels=test_dates[::10])
-plt.xticks(fontsize=8)
-plt.gcf().autofmt_xdate()
-plt.legend()
-plt.grid(True)
+# plt.xlabel('Fecha')
+# plt.ylabel('Precio')
+# plt.title('Tendencia de Ciclos Alcistas y Bajistas en el S&P 500')
+# plt.legend()
+# plt.tight_layout()  # Ajusta el gráfico para que las etiquetas no se corten
+# plt.show()
 
-plt.savefig('real_vs_predicted_prices.png')
-plt.close()
 
-print("Graph saved as 'real_vs_predicted_prices.png'")
 
-torch.save({
-    'model_state_dict': model.state_dict(),
-    'input_size_finetune': input_size_finetune,
-    'hidden_size': hidden_size,
-    'num_layers': num_layers,
-    'output_size': output_size,
-    'scaler_features_finetune': scaler_features_finetune,
-    'scaler_close_train': scaler_close_train
-}, 'fineTuning.pth')
+# plt.figure(figsize=(14, 7))
+# plt.plot(df['DateFormat'], df['Volatility'], label='Volatilidad (Ventana de 21 días)', color='blue')
+# plt.title('Volatilidad Mensual del Índice S&P 500')
+# plt.xlabel('Fecha')
+# plt.ylabel('Volatilidad')
+# plt.legend()
+# plt.show()
+
+
+
+# plt.figure(figsize=(12, 6))
+# plt.plot(test_dates, targets_original, label='Real Price', color='blue')
+# plt.plot(test_dates, predictions_original, label='Predicted Price', color='red')
+# plt.title('Real vs Predicted Stock Prices')
+# plt.xlabel('Time')
+# plt.ylabel('Price')
+
+# plt.xticks(rotation=45)
+# plt.xticks(ticks=np.arange(0, len(test_dates), step=10), labels=test_dates[::10])
+# plt.xticks(fontsize=8)
+# plt.gcf().autofmt_xdate()
+# plt.legend()
+# plt.grid(True)
+
+# plt.savefig('real_vs_predicted_prices.png')
+# plt.close()
+
+# print("Graph saved as 'real_vs_predicted_prices.png'")
+
+# torch.save({
+#     'model_state_dict': model.state_dict(),
+#     'input_size_finetune': input_size_finetune,
+#     'hidden_size': hidden_size,
+#     'num_layers': num_layers,
+#     'output_size': output_size,
+#     'scaler_features_finetune': scaler_features_finetune,
+#     'scaler_close_train': scaler_close_train
+# }, 'fineTuning.pth')

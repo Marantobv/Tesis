@@ -8,6 +8,7 @@ function NewsAndSentiment() {
   const [sentiment, setSentiment] = useState(null);
   const [prediction, setPrediction] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [classifiedNews, setClassifiedNews] = useState([]);
 
   const todayDate = new Date().toISOString().split('T')[0];
 
@@ -32,7 +33,7 @@ function NewsAndSentiment() {
             published_on: todayDate,
             page: i,
             group_similar: false,
-            api_token: 'YgCfzMKdyoSQiOjzRaksdYgJFfuPMmO9Njfgwvrq'
+            api_token: 'vVKNV51Yl3p0LukGL7dLg5v2db6kTrGF3Xok8vUE'
           }
         });
         const newsData = response.data.data.map(news => ({
@@ -50,8 +51,11 @@ function NewsAndSentiment() {
 
     if (!errorOccurred) {
       try {
-        await axios.post('http://127.0.0.1:5000/classify_news', allNews);
-        setMessage('Noticias clasificadas y guardadas correctamente');
+        const response = await axios.post('http://127.0.0.1:5000/classify_news', allNews, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        setClassifiedNews(response.data);  // Guardar el JSON de noticias clasificadas
+        setMessage('Noticias clasificadas correctamente');
       } catch (error) {
         setMessage('Error al clasificar las noticias');
       }
@@ -94,23 +98,51 @@ function NewsAndSentiment() {
     }
   };
 
+  const getSentimentClass = (sentiment) => {
+    switch (sentiment) {
+      case 'negative':
+        return 'text-red-700';
+      case 'positive':
+        return 'text-green-700';
+      case 'neutral':
+        return 'text-blue-700';
+      default:
+        return 'text-gray-700';
+    }
+  };
+
   return (
     <div className='section' id='news-and-sentiment'>
       <div className='container mx-auto max-w-[1200px] text-center text-morado'>
 
-        <div>
+        {/* <div>
           <h2 className='font-bold text-4xl font-secondary'>Guía de usuario</h2>
           <p className='font-bold text-lg font-secondary text-black'>SP500: <span className='font-normal'>Es un indicador bursátil que mide el rendimiento de las 500 empresas más grandes y representativas que cotizan en las bolsas de Estados Unidos (principalmente NYSE y NASDAQ). Es ampliamente utilizado como referencia del desempeño general del mercado de valores y de la economía estadounidense.</span></p>
           <p className='font-bold text-lg font-secondary text-black'>Clasificación de noticias: <span className='font-normal'>Este botón se usa para obtener noticias del día de hoy y generar posteriormente el índice de sentimientos para el día de hoy. Se debe mostrar el mensaje de confirmación para continuar</span></p>
           <p className='font-bold text-lg font-secondary text-black'>Agregar datos al CSV: <span className='font-normal'>Este botón se usa para calcular el índice de sentimiento y almacenarlo junto a los datos de precios del SP500. En caso ya se haya generado los datos para hoy se muestra un mensaje de error. Para obtener los precios de cierre y apertura ingresar al siguiente link: <a target='_blank' className='text-blue-500' href='https://finance.yahoo.com/quote/%5ESPX/history/'>Precios SP500</a></span></p>
           <p className='font-bold text-lg font-secondary text-black'>Predecir precio de cierre: <span className='font-normal'>Este botón muestra la predicción para el día de mañana. </span></p>
-        </div>
+        </div> */}
 
         <div className='p-4'>
           <h2 className='text-5xl font-bold mb-4 font-tertiary'>Clasificación de Noticias y Sentimiento Promedio</h2>
           <button onClick={classifyNews} className='bg-blue-800 text-white px-4 py-2 rounded mb-4 font-bold'>
             Clasificar Noticias
           </button>
+          <p>{message}</p>
+      <div className="news-list mt-4 grid grid-cols-2">
+        {classifiedNews.map((news, index) => (
+          <div key={index} className="border-2 border-yellow-400 m-4 rounded-xl p-2">
+            <h3 className="font-bold text-lg font-tertiary">{news.title}</h3>
+            <p className='font-secondary'>{news.description}</p>
+            <p className='font-bold'>Fecha: <span className='font-normal'>{news.date}</span></p>
+            <p className="font-bold">
+              Sentimiento: <span className={`uppercase font-bold ${getSentimentClass(news.sentiment)}`}>
+                {news.sentiment}
+              </span>
+            </p>
+          </div>
+        ))}
+      </div>
         </div>
 
         <div className='p-4'>

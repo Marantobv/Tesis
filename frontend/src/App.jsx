@@ -7,6 +7,7 @@ import Knowledge from './components/Knowledge'
 import Projects from './components/Projects'
 import Charts from './components/Charts'
 import NewsAndSentiment from './components/NewsAndSentiment'
+import FileUpload from './components/FileUpload'
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
       <Projects></Projects>
       {/* <Contact></Contact> */}
       <NewsAndSentiment></NewsAndSentiment>
+      <FileUpload></FileUpload>
       <div className='h-[200px]'></div>
     </div>
   )

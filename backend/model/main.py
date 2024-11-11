@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import json
 import pandas as pd
 import torch
+import io
 import torch.nn as nn
 from datetime import datetime
 from transformers import BertTokenizer
@@ -13,10 +14,20 @@ from sklearn.preprocessing import MinMaxScaler
 from torch.utils.data import DataLoader, TensorDataset
 import numpy as np
 import random
+import matplotlib.pyplot as plt
+
 
 app = Flask(__name__)
 
 CORS(app)
+
+seed = 42
+random.seed(seed)
+np.random.seed(seed)
+torch.manual_seed(seed)
+torch.cuda.manual_seed(seed)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 
 def create_sequences(data, target, seq_length):
     sequences = []
@@ -111,10 +122,7 @@ def classify_news():
             'sentiment': sentiment
         })
 
-    with open('classified_news.json', 'w') as file:
-        json.dump(classified_news, file, indent=4)
-
-    return jsonify({'message': 'Noticias clasificadas y guardadas correctamente'})
+    return jsonify(classified_news)
 
 @app.route('/add_sentiment_data', methods=['POST'])
 def add_sentiment_data():
@@ -157,17 +165,46 @@ def add_sentiment_data():
         'average_sentiment_day': average_sentiment_day
     })
 
-@app.route('/predict_close_price')
+@app.route('/volatility', methods=['POST'])
+def volatility_csv():
+
+    if 'file' not in request.files:
+        return jsonify({'message': 'No se encontró el archivo'}), 400
+
+    file = request.files['file']
+
+    df = pd.read_csv(file)
+
+    df['DateFormat'] = pd.to_datetime(df['Date'])
+
+    df['Log_Return'] = np.log(df['Close'] / df['Close'].shift(1))
+
+    df['Volatility'] = df['Log_Return'].rolling(window=21).std() * np.sqrt(252)
+
+    df['Volatility'].fillna(0, inplace=True)
+
+    plt.figure(figsize=(14, 7))
+    plt.plot(df['DateFormat'], df['Volatility'], label='Volatilidad (Ventana de 21 días)', color='blue')
+    plt.title('Volatilidad Mensual del Índice S&P 500')
+    plt.xlabel('Fecha')
+    plt.ylabel('Volatilidad')
+    plt.legend()
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+
+    return send_file(buf, mimetype='image/png')
+
+
+@app.route('/upload', methods=['POST'])
 def predict():
 
-    seed = 42
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-    df = pd.read_csv('SP500_Sentimentv2.csv')
+    if 'file' not in request.files:
+        return jsonify({'message': 'No se encontró el archivo'}), 400
+
+    file = request.files['file']
+
+    df = pd.read_csv(file)
 
     df_train = df[df['Date'] < '2021-01-01']
     df_finetune = df[df['Date'] >= '2021-01-01']
