@@ -64,20 +64,20 @@ def create_sequences(data, target, seq_length):
 
 
 
-MODEL_NAME = "MarantoBv/BERT_Model"
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, ignore_mismatched_sizes=True)
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-model.to(device)
-model.to(device)
-model.eval()
-
-
-# device = torch.device(config.DEVICE)
-# model = BERTBaseUncased()
-# model.load_state_dict(torch.load(config.MODEL_PATH))
+# MODEL_NAME = "MarantoBv/BERT_Model"
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, ignore_mismatched_sizes=True)
+# tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+# model.to(device)
 # model.to(device)
 # model.eval()
+
+
+device = torch.device(config.DEVICE)
+model = BERTBaseUncased()
+model.load_state_dict(torch.load(config.MODEL_PATH))
+model.to(device)
+model.eval()
 
 tokenizer = BertTokenizer.from_pretrained(config.BERT_PATH)
 
