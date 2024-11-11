@@ -254,6 +254,35 @@ print(historico_15_dias)
 print("\nPredicted Values (Next 7 days):")
 print(prediction_df)
 
+def mean_absolute_percentage_error(y_true, y_pred):
+    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+
+model.eval()
+all_predictions = []
+all_targets = []
+
+with torch.no_grad():
+    for sequences, labels in test_loader:
+        sequences, labels = sequences.to(device), labels.to(device)
+        outputs = model(sequences)
+        all_predictions.extend(outputs.cpu().numpy())
+        all_targets.extend(labels.cpu().numpy())
+
+all_predictions = np.array(all_predictions)
+all_targets = np.array(all_targets)
+
+predictions_original = scaler_close_train.inverse_transform(all_predictions)
+targets_original = scaler_close_train.inverse_transform(all_targets)
+
+mape = mean_absolute_percentage_error(targets_original, predictions_original)
+mae = mean_absolute_error(targets_original, predictions_original)
+rmse = np.sqrt(mean_squared_error(targets_original, predictions_original))
+
+print(f"Test Set Metrics:")
+print(f"MAPE: {mape:.2f}%")
+print(f"MAE: {mae:.2f}")
+print(f"RMSE: {rmse:.2f}")
+
 # std_dev = np.std(predictions)
 # prediction_df['Lower Bound'] = prediction_df['Predicted Close'] - (1.96 * std_dev)
 # prediction_df['Upper Bound'] = prediction_df['Predicted Close'] + (1.96 * std_dev)

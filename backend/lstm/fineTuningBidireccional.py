@@ -18,7 +18,7 @@ torch.cuda.manual_seed(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-df = pd.read_csv('SP500_FullSentimentReduced.csv')
+df = pd.read_csv('SP500_FullSentiment_Agosto.csv')
 df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d')
 
 df_train = df[df['Date'] < '2021-01-01']

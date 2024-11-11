@@ -124,7 +124,7 @@ function NewsAndSentiment() {
         </div> */}
 
         <div className='p-4'>
-          <h2 className='text-5xl font-bold mb-4 font-tertiary'>Clasificación de Noticias y Sentimiento Promedio</h2>
+          <h2 className='text-5xl font-bold mb-4 font-tertiary'>Clasificación de Noticias de hoy</h2>
           <button onClick={classifyNews} className='bg-blue-800 text-white px-4 py-2 rounded mb-4 font-bold'>
             Clasificar Noticias
           </button>
@@ -146,45 +146,45 @@ function NewsAndSentiment() {
         </div>
 
         <div className='p-4'>
-          <h2 className='text-5xl font-bold mb-4 font-tertiary text-morado'>Ingrese el precio de apertura y cierre de hoy</h2>
+          {/* <h2 className='text-5xl font-bold mb-4 font-tertiary text-morado'>Ingrese el precio de apertura y cierre de hoy</h2> */}
           <div className='mb-4 flex justify-center gap-16'>
             <div className='flex flex-col text-left'>
-            <label>Precio de apertura</label>
+            {/* <label>Precio de apertura</label>
             <input
               type='text'
               placeholder='Ej. 5620.45'
               value={openPrice}
               onChange={(e) => setOpenPrice(e.target.value)}
               className='border p-2 mr-2 border-cyan-900 rounded'
-            />
+            /> */}
             </div>
             <div  className='flex flex-col text-left'>
-            <label>Precio de cierre</label>
+            {/* <label>Precio de cierre</label>
             <input
               type='text'
               placeholder='Ej. 5650.95'
               value={closePrice}
               onChange={(e) => setClosePrice(e.target.value)}
               className='border p-2 mr-2 border-cyan-900 rounded'
-            />
+            /> */}
             </div>
           </div>
-          <button onClick={addSentimentData} className='bg-green-800 text-white px-4 py-2 rounded font-bold'>
+          {/* <button onClick={addSentimentData} className='bg-green-800 text-white px-4 py-2 rounded font-bold'>
             Agregar datos al CSV
-          </button>
+          </button> */}
         </div>
 
-        {message && <p className='mt-4 text-lg'>{message}</p>}
+        {/* {message && <p className='mt-4 text-lg'>{message}</p>} */}
 
         {sentiment !== null && (
           <p className='mt-4 text-lg'>Sentimiento promedio del día: {sentiment}</p>
         )}
 
         <div className='p-4'>
-          <h2 className='text-5xl font-bold mb-4 font-tertiary text-morado'>Obtener predicción para mañana {tomorrowDate}</h2>
+          {/* <h2 className='text-5xl font-bold mb-4 font-tertiary text-morado'>Obtener predicción para mañana {tomorrowDate}</h2>
           <button onClick={predictClosePrice} className='bg-red-800 text-white px-4 py-2 rounded font-bold'>
             Predecir precio de cierre
-          </button>
+          </button> */}
 
           {isLoading && <div role="status">
     <svg aria-hidden="true" class="inline w-10 h-10 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, make_response
+import base64
 import json
 import pandas as pd
 import torch
@@ -8,6 +9,7 @@ import matplotlib.dates as mdates
 from datetime import datetime
 from transformers import BertTokenizer
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 from model import BERTBaseUncased
 import config
 from flask_cors import CORS  # Importar CORS
@@ -64,20 +66,20 @@ def create_sequences(data, target, seq_length):
 
 
 
-# MODEL_NAME = "MarantoBv/BERT_Model"
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, ignore_mismatched_sizes=True)
-# tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-# model.to(device)
-# model.to(device)
-# model.eval()
-
-
-device = torch.device(config.DEVICE)
-model = BERTBaseUncased()
-model.load_state_dict(torch.load(config.MODEL_PATH))
+MODEL_NAME = "MarantoBv/BERT_Model"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, ignore_mismatched_sizes=True)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+model.to(device)
 model.to(device)
 model.eval()
+
+
+# device = torch.device(config.DEVICE)
+# model = BERTBaseUncased()
+# model.load_state_dict(torch.load(config.MODEL_PATH))
+# model.to(device)
+# model.eval()
 
 tokenizer = BertTokenizer.from_pretrained(config.BERT_PATH)
 
@@ -146,7 +148,7 @@ def upload_csv():
     file = request.files['file']
     filepath = os.path.join(UPLOAD_FOLDER, 'data.csv')
     file.save(filepath)
-    return jsonify({"message": "File uploaded successfully!"})
+    return jsonify({"message": "Archivo cargado correctamente!"})
 
 @app.route('/process_data', methods=['POST'])
 def process_data():
@@ -164,7 +166,6 @@ def process_data():
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
         df = pd.read_csv(filepath)
-        # Realiza aquí el procesamiento del CSV según sea necesario
 
         df_train = df[df['Date'] < '2021-01-01']
         df_finetune = df[df['Date'] >= '2021-01-01']
@@ -283,8 +284,8 @@ def process_data():
             
             scaled_open = scaler_features_train.transform([[open_price, open_price]])[0][0]
             
-            new_row[0] = scaled_open  # Open
-            new_row[1] = predicted_scaled[0][0]  # Close
+            new_row[0] = scaled_open
+            new_row[1] = predicted_scaled[0][0]
             
             if input_sequence.shape[1] > 2:
                 new_row[2] = np.mean(input_sequence[-5:, 2]) + np.random.uniform(-0.1, 0.1)
@@ -301,6 +302,38 @@ def process_data():
 
         prediction_df['Date'] = pd.to_datetime(prediction_df['Date']).dt.date
         matplotlib.use('Agg')
+
+        def mean_absolute_percentage_error(y_true, y_pred):
+            return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+
+        model.eval()
+        all_predictions = []
+        all_targets = []
+
+        with torch.no_grad():
+            for sequences, labels in test_loader:
+                sequences, labels = sequences.to(device), labels.to(device)
+                outputs = model(sequences)
+                all_predictions.extend(outputs.cpu().numpy())
+                all_targets.extend(labels.cpu().numpy())
+
+        all_predictions = np.array(all_predictions)
+        all_targets = np.array(all_targets)
+
+        predictions_original = scaler_close_train.inverse_transform(all_predictions)
+        targets_original = scaler_close_train.inverse_transform(all_targets)
+
+        mape = mean_absolute_percentage_error(targets_original, predictions_original)
+        mae = mean_absolute_error(targets_original, predictions_original)
+        rmse = np.sqrt(mean_squared_error(targets_original, predictions_original))
+
+        metrics = {
+            'MAPE': str(mape),
+            'MAE': str(mae),
+            'RMSE': str(rmse)
+        }
+
+
         plt.figure(figsize=(12, 6))
         plt.plot(historico_15_dias['Date'], historico_15_dias['Close'], 
                 label='Historical Prices', color='blue', marker='o')
@@ -343,8 +376,15 @@ def process_data():
         plt.savefig(img, format='PNG')
         # Por ejemplo, plt.savefig(img, format='PNG')
         img.seek(0)
-        return send_file(img, mimetype='image/png')
-        #return jsonify({"message": "Data processed successfully!"})
+        img = base64.b64encode(img.getvalue()).decode('utf-8')
+        plt.close()
+
+        response_data = {
+            "metrics": metrics,
+            "image": img
+        }
+
+        return jsonify(response_data)
     else:
         return jsonify({"error": "File not found!"}), 404
 
@@ -353,7 +393,6 @@ def generate_image():
     filepath = os.path.join(UPLOAD_FOLDER, 'data.csv')
     if os.path.exists(filepath):
         df = pd.read_csv(filepath)
-        # Realiza aquí la generación de imagen basada en el CSV
 
         df['DateFormat'] = pd.to_datetime(df['Date'])
 
@@ -371,7 +410,6 @@ def generate_image():
         plt.grid(True)
         img = BytesIO()
         plt.savefig(img, format='PNG')
-        # Por ejemplo, plt.savefig(img, format='PNG')
         img.seek(0)
         return send_file(img, mimetype='image/png')
     else:
@@ -382,14 +420,13 @@ def ciclos():
     filepath = os.path.join(UPLOAD_FOLDER, 'data.csv')
     if os.path.exists(filepath):
         df = pd.read_csv(filepath)
-        # Realiza aquí la generación de imagen basada en el CSV
         df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d')
         df['SMA_20'] = df['Close'].rolling(window=20).mean()
         df['SMA_50'] = df['Close'].rolling(window=50).mean()
 
         df['Signal'] = 0
-        df['Signal'][df['SMA_20'] > df['SMA_50']] = 1  # Ciclo alcista
-        df['Signal'][df['SMA_20'] < df['SMA_50']] = -1 # Ciclo bajista
+        df['Signal'][df['SMA_20'] > df['SMA_50']] = 1
+        df['Signal'][df['SMA_20'] < df['SMA_50']] = -1
 
         matplotlib.use('Agg')
         plt.figure(figsize=(14, 7))
@@ -401,9 +438,8 @@ def ciclos():
         plt.fill_between(df['Date'], df['Close'].min(), df['Close'].max(), 
                         where=(df['Signal'] == -1), color='red', alpha=0.1, label='Ciclo Bajista')
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-        plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=6))  # Muestra cada 6 meses, ajusta según prefieras
-        plt.xticks(rotation=45)  # Rota las etiquetas del eje X para que no se superpongan
-
+        plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=6))
+        plt.xticks(rotation=45)
         plt.xlabel('Fecha')
         plt.ylabel('Precio')
         plt.title('Tendencia de Ciclos Alcistas y Bajistas en el Indice')
@@ -411,7 +447,6 @@ def ciclos():
         plt.tight_layout()
         img = BytesIO()
         plt.savefig(img, format='PNG')
-        # Por ejemplo, plt.savefig(img, format='PNG')
         img.seek(0)
         return send_file(img, mimetype='image/png')
     else:
